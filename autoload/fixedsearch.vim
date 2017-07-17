@@ -1,5 +1,34 @@
+function! s:hlclear()
+  if exists('s:m')
+    call matchdelete(s:m)
+    unlet s:m
+  endif
+endfunction
+
+function! s:on_change(input)
+  call s:hlclear()
+  let input = '['. join(map(split(join(a:input, ''), '\zs'), 'printf("\\x%X", char2nr(v:val))'), '][') . ']'
+  let s:m = matchadd("IncSearch", input)
+endfunction
+
+function! s:input(prompt)
+  try
+    return prompter#input({
+    \ 'color': 'Normal',
+    \ 'prompt': a:prompt,
+    \ 'on_enter':  {x -> x},
+    \ 'on_change':  function('s:on_change'),
+    \})
+  catch
+  finally
+    call s:hlclear()
+  endtry
+  return input(a:prompt)
+endfunction
+
 function! fixedsearch#search() abort
-  let t = input('FIXED: ')
+  call s:hlclear()
+  let t = s:input('FIXED: ')
   if t == ''
     redraw!
     return
