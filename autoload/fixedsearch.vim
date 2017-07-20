@@ -8,7 +8,9 @@ endfunction
 function! s:on_change(input)
   call s:hlclear()
   let input = '['. join(map(split(join(a:input, ''), '\zs'), 'printf("\\x%X", char2nr(v:val))'), '][') . ']'
-  let s:m = matchadd("IncSearch", input)
+  if len(input) > 0
+    let s:m = matchadd("IncSearch", input)
+  endif
 endfunction
 
 function! s:input(prompt)
@@ -16,7 +18,6 @@ function! s:input(prompt)
     return prompter#input({
     \ 'color': 'Normal',
     \ 'prompt': a:prompt,
-    \ 'on_enter':  {x -> x},
     \ 'on_change':  function('s:on_change'),
     \})
   catch
